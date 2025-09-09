@@ -12,7 +12,10 @@ host: process.env.SMTP_HOST,
 port: parseInt(process.env.SMTP_PORT || "587", 10),
 user: process.env.SMTP_USER,
 pass: process.env.SMTP_PASS,
-from: process.env.SMTP_FROM
+from: process.env.SMTP_FROM,
+fromName: process.env.FROM_NAME,
+fromEmail: process.env.FROM_EMAIL,
+secure: process.env.SMTP_SECURE === "true"
 };
 
 
@@ -27,7 +30,9 @@ const PROFILE = {
 name: process.env.PROFILE_NAME || "John Doe",
 title: process.env.PROFILE_TITLE || "Fullstack Developer",
 location: process.env.PROFILE_LOCATION || "Remote",
-links: process.env.PROFILE_LINKS || "https://portfolio.example.com"
+links: process.env.PROFILE_LINKS || "https://portfolio.example.com",
+attachCV: process.env.ATTACH_CV === "true",
+cvPath: process.env.CV_PATH
 };
 
 
@@ -37,6 +42,14 @@ SMTP,
 OPENAI_CONFIG,
 PROFILE,
 DB: {
-    path: process.env.DB_PATH || "./data/mrmailer.sqlite" // or your actual DB file path
+    // SQLite (for local development)
+    path: process.env.DB_PATH || "./data/mrmailer.sqlite",
+    
+    // MongoDB (for production/cloud deployment)
+    connectionString: process.env.MONGODB_URI || process.env.MONGODB_CONNECTION_STRING,
+    databaseName: process.env.MONGODB_DATABASE || "mrmailer",
+    
+    // Database type selection
+    type: process.env.DB_TYPE || "sqlite" // "sqlite" or "mongodb"
   },
 };
