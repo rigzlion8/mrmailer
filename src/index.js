@@ -13,6 +13,9 @@ const app = express();
 
 const PORT = process.env.PORT || 3003;
 
+// Serve static files from public directory
+app.use(express.static('public'));
+
 // Initialize database connection
 async function initializeDatabase() {
   try {
