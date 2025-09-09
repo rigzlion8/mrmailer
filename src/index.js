@@ -154,7 +154,12 @@ app.get('/', async (req, res) => {
   // Generate mobile cards
   const mobileCards = recent.map((email, index) => {
     const emailId = `mobile-email-${index}`;
-    const showMoreButton = email.body.length > 150 ? 
+    
+    // Handle both SQLite (to_email) and MongoDB (to) data structures
+    const recipientEmail = email.to_email || email.to || 'unknown@example.com';
+    const emailBody = email.body || '';
+    const truncatedBody = emailBody.length > 150 ? emailBody.substring(0, 150) + '...' : emailBody;
+    const showMoreButton = emailBody.length > 150 ? 
       `<button onclick="toggleEmailBody(this, '${emailId}')" class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors duration-200">Show more</button>` : '';
     
     const intentColor = email.intent === 'apply' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800';
@@ -180,7 +185,7 @@ app.get('/', async (req, res) => {
           <div class="text-sm font-medium text-gray-900 mb-2">${email.subject}</div>
           <div class="relative">
             <div id="email-body-${emailId}" class="email-body text-sm text-gray-600 leading-relaxed">
-              ${email.body}
+              ${emailBody}
             </div>
             <div id="fade-${emailId}" class="fade-gradient absolute bottom-0 left-0 right-0 h-8 pointer-events-none"></div>
             ${showMoreButton}
