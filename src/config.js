@@ -42,7 +42,7 @@ SMTP,
 OPENAI_CONFIG,
 PROFILE,
 DB: {
-    // SQLite (for local development)
+    // SQLite (for local development only)
     path: process.env.DB_PATH || "./data/mrmailer.sqlite",
     
     // MongoDB (for production/cloud deployment)
