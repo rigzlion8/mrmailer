@@ -16,7 +16,46 @@ const PORT = process.env.PORT || 3003;
 //app.get('/', (req, res) => res.send('mr mailer is running!'));
 app.get('/', async (req, res) => {
      // Fetch recent emails for all recipients (example: last 20 sent)
-  const recent = getAllRecent();
+  let recent;
+  try {
+    recent = await getAllRecent();
+    console.log(`[dashboard] 📊 Retrieved ${recent ? recent.length : 0} emails`);
+  } catch (error) {
+    console.error(`[dashboard] ❌ Failed to get recent emails:`, error);
+    const errorState = `
+      <div class="text-center py-12">
+        <div class="text-red-400 text-6xl mb-4">⚠️</div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Database Error</h3>
+        <p class="text-gray-500 mb-4">Unable to load emails. Please check the database connection.</p>
+        <div class="bg-red-50 rounded-lg p-4 text-left max-w-md mx-auto">
+          <code class="text-sm text-red-800">${error.message}</code>
+        </div>
+      </div>
+    `;
+    const html = require('fs').readFileSync(path.join(__dirname, '../public/dashboard.html'), 'utf8');
+    const finalHtml = html.replace('<!--EMAIL_ROWS-->', errorState);
+    res.send(finalHtml);
+    return;
+  }
+  
+  // Validate that recent is an array
+  if (!Array.isArray(recent)) {
+    console.error(`[dashboard] ❌ getAllRecent returned non-array:`, typeof recent, recent);
+    const errorState = `
+      <div class="text-center py-12">
+        <div class="text-red-400 text-6xl mb-4">⚠️</div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Data Format Error</h3>
+        <p class="text-gray-500 mb-4">Invalid data format received from database.</p>
+        <div class="bg-red-50 rounded-lg p-4 text-left max-w-md mx-auto">
+          <code class="text-sm text-red-800">Expected array, got ${typeof recent}</code>
+        </div>
+      </div>
+    `;
+    const html = require('fs').readFileSync(path.join(__dirname, '../public/dashboard.html'), 'utf8');
+    const finalHtml = html.replace('<!--EMAIL_ROWS-->', errorState);
+    res.send(finalHtml);
+    return;
+  }
 
   // Read the dashboard HTML template
   const dashboardPath = path.join(__dirname, '../public/dashboard.html');
