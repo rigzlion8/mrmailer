@@ -6,17 +6,31 @@ let db;
 
 // MongoDB connection
 async function connectDB() {
-  if (client) return client;
+  if (client && db) return client;
   
   try {
     console.log(`[db] 🔌 Connecting to MongoDB...`);
+    console.log(`[db] 📋 Connection string: ${DB.connectionString ? 'Set' : 'Not set'}`);
+    console.log(`[db] 📋 Database name: ${DB.databaseName || 'mrmailer'}`);
+    
+    if (!DB.connectionString) {
+      throw new Error("MongoDB connection string not provided");
+    }
+    
     client = new MongoClient(DB.connectionString);
     await client.connect();
+    
+    // Test the connection
+    await client.db("admin").command({ ping: 1 });
+    console.log(`[db] ✅ MongoDB ping successful`);
+    
     db = client.db(DB.databaseName || 'mrmailer');
     console.log(`[db] ✅ Connected to MongoDB database: ${db.databaseName}`);
     return client;
   } catch (error) {
     console.error(`[db] ❌ MongoDB connection failed:`, error);
+    client = null;
+    db = null;
     throw error;
   }
 }
@@ -26,12 +40,18 @@ async function getDB() {
   if (!db) {
     await connectDB();
   }
+  if (!db) {
+    throw new Error("Failed to establish database connection");
+  }
   return db;
 }
 
 // Get collection
 async function getCollection(name) {
   const database = await getDB();
+  if (!database) {
+    throw new Error("Database instance is null");
+  }
   return database.collection(name);
 }
 
