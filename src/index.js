@@ -78,7 +78,7 @@ async function run() {
 
   const client = createClient();
 
-  client.once("ready", () => {
+  client.once("clientReady", () => {
     console.log(`🤖 Logged in as ${client.user.tag}`);
     if (DISCORD.channelId) console.log(`Listening only on channel ${DISCORD.channelId}`);
   });

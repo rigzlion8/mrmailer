@@ -35,5 +35,8 @@ module.exports = {
 DISCORD,
 SMTP,
 OPENAI_CONFIG,
-PROFILE
+PROFILE,
+DB: {
+    path: process.env.DB_PATH || "./data/mrmailer.sqlite" // or your actual DB file path
+  },
 };
