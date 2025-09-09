@@ -1,0 +1,30 @@
+{
+  "name": "mrmailer",
+  "version": "1.0.0",
+  "main": "src/index.js",
+"scripts": {
+"dev": "node src/index.js",
+"start": "NODE_ENV=production node src/index.js"
+},
+"dependencies": {
+"better-sqlite3": "^9.4.0",
+"dotenv": "^16.4.5",
+"discord.js": "^14.15.3",
+"nodemailer": "^6.9.14",
+"openai": "^4.67.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rigzlion8/mrmailer.git"
+  },
+  "keywords": [
+    "mailer"
+  ],
+  "author": "rigzlion8",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rigzlion8/mrmailer/issues"
+  },
+  "homepage": "https://github.com/rigzlion8/mrmailer#readme",
+  "description": ""
+}
