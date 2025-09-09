@@ -2,11 +2,7 @@ const OpenAI = require("openai");
 const { PROFILE, OPENAI_CONFIG } = require("./config");
 
 
-// Use OpenRouter endpoint
-const client = new OpenAI({
-apiKey: process.env.OPENROUTER_KEY,
-baseURL: "https://openrouter.ai/api/v1"
-});
+const client = new OpenAI({ apiKey: OPENAI_CONFIG.apiKey });
 
 
 /**
