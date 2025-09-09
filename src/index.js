@@ -90,8 +90,12 @@ app.get('/', async (req, res) => {
   // Generate table rows with enhanced styling and show more functionality
   const rows = recent.map((email, index) => {
     const emailId = `email-${index}`;
-    const truncatedBody = email.body.length > 150 ? email.body.substring(0, 150) + '...' : email.body;
-    const showMoreButton = email.body.length > 150 ? 
+    
+    // Handle both SQLite (to_email) and MongoDB (to) data structures
+    const recipientEmail = email.to_email || email.to || 'unknown@example.com';
+    const emailBody = email.body || '';
+    const truncatedBody = emailBody.length > 150 ? emailBody.substring(0, 150) + '...' : emailBody;
+    const showMoreButton = emailBody.length > 150 ? 
       `<button onclick="toggleEmailBody(this, '${emailId}')" class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors duration-200">Show more</button>` : '';
     
     const intentColor = email.intent === 'apply' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800';
@@ -102,10 +106,10 @@ app.get('/', async (req, res) => {
         <td class="px-6 py-4 whitespace-nowrap">
           <div class="flex items-center">
             <div class="w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-              ${email.to_email.charAt(0).toUpperCase()}
+              ${recipientEmail.charAt(0).toUpperCase()}
             </div>
             <div class="ml-3">
-              <div class="text-sm font-medium text-gray-900">${email.to_email}</div>
+              <div class="text-sm font-medium text-gray-900">${recipientEmail}</div>
               <div class="text-xs text-gray-500">${email.role || 'No role specified'}</div>
             </div>
           </div>
@@ -160,10 +164,10 @@ app.get('/', async (req, res) => {
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
         <div class="flex items-start space-x-3 mb-3">
           <div class="w-10 h-10 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-            ${email.to_email.charAt(0).toUpperCase()}
+            ${recipientEmail.charAt(0).toUpperCase()}
           </div>
           <div class="flex-1 min-w-0">
-            <div class="text-sm font-medium text-gray-900 truncate">${email.to_email}</div>
+            <div class="text-sm font-medium text-gray-900 truncate">${recipientEmail}</div>
             <div class="text-xs text-gray-500">${email.role || 'No role specified'}</div>
           </div>
           <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${intentColor}">
