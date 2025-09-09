@@ -1,8 +1,26 @@
 const { DB } = require("./config");
 
-// Import both database implementations
-const sqliteDB = require("./db");
-const mongoDB = require("./db-mongodb");
+// Import database implementations conditionally
+let sqliteDB = null;
+let mongoDB = null;
+
+// Only import SQLite if we're using it
+if (DB.type === "sqlite") {
+  try {
+    sqliteDB = require("./db");
+  } catch (error) {
+    console.error("Failed to load SQLite database:", error.message);
+  }
+}
+
+// Only import MongoDB if we're using it
+if (DB.type === "mongodb") {
+  try {
+    mongoDB = require("./db-mongodb");
+  } catch (error) {
+    console.error("Failed to load MongoDB database:", error.message);
+  }
+}
 
 // Database adapter that switches between SQLite and MongoDB
 class DatabaseAdapter {
@@ -15,9 +33,18 @@ class DatabaseAdapter {
     if (this.isConnected) return;
     
     if (this.dbType === "mongodb") {
+      if (!mongoDB) {
+        throw new Error("MongoDB module not loaded. Check your environment variables.");
+      }
       await mongoDB.connectDB();
+    } else if (this.dbType === "sqlite") {
+      if (!sqliteDB) {
+        throw new Error("SQLite module not loaded. Check your environment variables.");
+      }
+      // SQLite doesn't need explicit connection
+    } else {
+      throw new Error(`Unsupported database type: ${this.dbType}. Use 'sqlite' or 'mongodb'.`);
     }
-    // SQLite doesn't need explicit connection
     this.isConnected = true;
   }
 
@@ -25,8 +52,10 @@ class DatabaseAdapter {
     await this.connect();
     
     if (this.dbType === "mongodb") {
+      if (!mongoDB) throw new Error("MongoDB not available");
       return await mongoDB.logEmail(emailData);
     } else {
+      if (!sqliteDB) throw new Error("SQLite not available");
       return sqliteDB.logEmail(emailData);
     }
   }
@@ -35,8 +64,10 @@ class DatabaseAdapter {
     await this.connect();
     
     if (this.dbType === "mongodb") {
+      if (!mongoDB) throw new Error("MongoDB not available");
       return await mongoDB.recentFor(email);
     } else {
+      if (!sqliteDB) throw new Error("SQLite not available");
       return sqliteDB.recentFor(email);
     }
   }
@@ -45,8 +76,10 @@ class DatabaseAdapter {
     await this.connect();
     
     if (this.dbType === "mongodb") {
+      if (!mongoDB) throw new Error("MongoDB not available");
       return await mongoDB.getAllRecent();
     } else {
+      if (!sqliteDB) throw new Error("SQLite not available");
       // For SQLite, we need to use the raw database
       const db = sqliteDB.db;
       return db.prepare('SELECT * FROM sent_emails WHERE deleted = FALSE ORDER BY created_at DESC LIMIT 20').all();
@@ -57,14 +90,16 @@ class DatabaseAdapter {
     await this.connect();
     
     if (this.dbType === "mongodb") {
+      if (!mongoDB) throw new Error("MongoDB not available");
       return await mongoDB.softDeleteEmail(id);
     } else {
+      if (!sqliteDB) throw new Error("SQLite not available");
       return sqliteDB.softDeleteEmail(id);
     }
   }
 
   async close() {
-    if (this.dbType === "mongodb") {
+    if (this.dbType === "mongodb" && mongoDB) {
       await mongoDB.closeDB();
     }
     this.isConnected = false;
@@ -73,8 +108,10 @@ class DatabaseAdapter {
   // Get the raw database instance (for compatibility)
   get rawDB() {
     if (this.dbType === "mongodb") {
+      if (!mongoDB) throw new Error("MongoDB not available");
       return mongoDB.getDB();
     } else {
+      if (!sqliteDB) throw new Error("SQLite not available");
       return sqliteDB.db;
     }
   }
