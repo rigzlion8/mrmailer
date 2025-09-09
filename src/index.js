@@ -1,10 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 const { createClient, parseCommand } = require("./discord");
-const { DISCORD } = require("./config");
+const { DISCORD, DB } = require("./config");
 const { generateEmail } = require("./ai");
 const { sendEmail } = require("./email");
-const { logEmail, recentFor, getAllRecent, softDeleteEmail } = require("./db-adapter");
+const dbAdapter = require("./db-adapter");
 const { formatPreview } = require("./templates");
 
 
@@ -13,12 +13,24 @@ const app = express();
 
 const PORT = process.env.PORT || 3003;
 
+// Initialize database connection
+async function initializeDatabase() {
+  try {
+    if (DB.type === 'mongodb') {
+      await dbAdapter.connect();
+      console.log('[db] ✅ Database connection initialized');
+    }
+  } catch (error) {
+    console.error('[db] ❌ Failed to initialize database:', error);
+  }
+}
+
 //app.get('/', (req, res) => res.send('mr mailer is running!'));
 app.get('/', async (req, res) => {
      // Fetch recent emails for all recipients (example: last 20 sent)
   let recent;
   try {
-    recent = await getAllRecent();
+    recent = await dbAdapter.getAllRecent();
     console.log(`[dashboard] 📊 Retrieved ${recent ? recent.length : 0} emails`);
   } catch (error) {
     console.error(`[dashboard] ❌ Failed to get recent emails:`, error);
@@ -219,14 +231,25 @@ app.get('/', async (req, res) => {
 // Delete endpoint for soft deleting emails
 app.delete('/api/email/:id', async (req, res) => {
   try {
-    const emailId = parseInt(req.params.id);
-    if (isNaN(emailId)) {
-      return res.status(400).json({ error: 'Invalid email ID' });
-    }
+    const emailId = req.params.id;
     
-    const result = softDeleteEmail(emailId);
-    if (result.changes === 0) {
-      return res.status(404).json({ error: 'Email not found' });
+    // For SQLite, try to parse as integer
+    if (DB.type === 'sqlite') {
+      const parsedId = parseInt(emailId);
+      if (isNaN(parsedId)) {
+        return res.status(400).json({ error: 'Invalid email ID' });
+      }
+      
+      const result = await dbAdapter.softDeleteEmail(parsedId);
+      if (result.changes === 0) {
+        return res.status(404).json({ error: 'Email not found' });
+      }
+    } else {
+      // For MongoDB, use the string ID directly
+      const result = await dbAdapter.softDeleteEmail(emailId);
+      if (!result) {
+        return res.status(404).json({ error: 'Email not found' });
+      }
     }
     
     res.json({ success: true, message: 'Email deleted successfully' });
@@ -236,8 +259,9 @@ app.delete('/api/email/:id', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`HTTP server listening on port ${PORT}`);
+  await initializeDatabase();
 });
 
 const PREVIEW_ONLY = (process.env.PREVIEW_ONLY || "false").toLowerCase() === "true";
@@ -257,7 +281,7 @@ async function handlePayload(msg, payload) {
 
   try {
     console.log(`[handlePayload] 🔍 Checking recent emails for ${to}`);
-    const recent = recentFor(to);
+    const recent = await dbAdapter.recentFor(to);
     if (recent && recent.length) {
       console.log(`[handlePayload] ⚠️ Found ${recent.length} recent emails for ${to}`);
       await msg.reply(`⚠️ Recently emailed ${to} (${recent.length}x). Proceeding anyway...`);
@@ -310,7 +334,7 @@ async function handlePayload(msg, payload) {
 
   try {
     console.log(`[db] 💾 Logging email to database...`);
-    logEmail({ to, subject, body, intent, role, jobDesc, extra, messageId: info?.messageId || null });
+    await dbAdapter.logEmail({ to, subject, body, intent, role, jobDesc, extra, messageId: info?.messageId || null });
     console.log(`[db] ✅ Email logged successfully`);
   } catch (err) {
     console.warn("[db] ❌ Failed to log email", err);
