@@ -13,6 +13,17 @@ const { sendEmail } = require("./email");
 const { logEmail, recentFor } = require("./db");
 const { formatPreview } = require("./templates");
 
+const express = require('express');
+const app = express();
+
+const PORT = process.env.PORT || 3003;
+
+app.get('/', (req, res) => res.send('mr mailer is running!'));
+
+app.listen(PORT, () => {
+  console.log(`HTTP server listening on port ${PORT}`);
+});
+
 const PREVIEW_ONLY = (process.env.PREVIEW_ONLY || "false").toLowerCase() === "true";
 
 async function handlePayload(msg, payload) {
