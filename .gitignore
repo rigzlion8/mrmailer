@@ -1,0 +1,9 @@
+.env
+.env.local
+.env.*.local
+node_modules
+dist
+build
+.vercel
+.env.railway
+RAILWAY_ENV_VALUES.txt

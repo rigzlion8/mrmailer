@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>mrMailer Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .email-body {
+      max-height: 100px;
+      overflow: hidden;
+      transition: max-height 0.3s ease-in-out;
+    }
+    .email-body.expanded {
+      max-height: none;
+    }
+    .fade-gradient {
+      background: linear-gradient(transparent, white);
+      transition: opacity 0.3s ease-in-out;
+    }
+    .fade-gradient.hidden {
+      opacity: 0;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+  <!-- Navbar -->
+  <nav class="bg-white/80 backdrop-blur-sm shadow-lg border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+              <span class="text-white text-xl">📧</span>
+            </div>
+            <div>
+              <h1 class="text-xl font-bold text-gray-900">mrMailer</h1>
+              <p class="text-xs text-gray-500">AI Email Assistant</p>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <div class="hidden sm:flex items-center space-x-2 text-sm text-gray-600">
+            <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span>Bot Online</span>
+          </div>
+          <div class="text-sm text-gray-500">
+            Activity Dashboard
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header Section -->
+    <div class="mb-8">
+      <div class="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Recent Email Activity
+            </h1>
+            <p class="text-gray-600 mt-2">Track your AI-generated emails and their delivery status</p>
+          </div>
+          <div class="mt-4 sm:mt-0 flex items-center space-x-4">
+            <div class="bg-blue-50 rounded-lg px-4 py-2">
+              <span class="text-sm font-medium text-blue-700">Last 20 emails</span>
+            </div>
+            <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center space-x-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+              <span>Refresh</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Email Table -->
+    <div class="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+      <!-- Desktop Table View -->
+      <div class="hidden lg:block overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gradient-to-r from-blue-50 to-indigo-50">
+            <tr>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <div class="flex items-center space-x-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+                  </svg>
+                  <span>Recipient</span>
+                </div>
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <div class="flex items-center space-x-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+                  </svg>
+                  <span>Subject & Content</span>
+                </div>
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <div class="flex items-center space-x-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <span>Type</span>
+                </div>
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <div class="flex items-center space-x-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <span>Sent At</span>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-100">
+            <!--EMAIL_ROWS-->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Card View -->
+      <div class="lg:hidden">
+        <div class="p-4">
+          <div class="space-y-4">
+            <!--MOBILE_EMAIL_CARDS-->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-8 text-center">
+      <div class="bg-white/50 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+        <p class="text-sm text-gray-600">
+          Powered by <span class="font-semibold text-blue-600">mrMailer</span> • 
+          <span class="text-gray-500">AI-powered email automation</span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleEmailBody(button, emailId) {
+      const bodyElement = document.getElementById(`email-body-${emailId}`);
+      const fadeElement = document.getElementById(`fade-${emailId}`);
+      
+      if (bodyElement.classList.contains('expanded')) {
+        bodyElement.classList.remove('expanded');
+        fadeElement.classList.remove('hidden');
+        button.innerHTML = 'Show more';
+        button.classList.remove('text-blue-600');
+        button.classList.add('text-gray-500');
+      } else {
+        bodyElement.classList.add('expanded');
+        fadeElement.classList.add('hidden');
+        button.innerHTML = 'Show less';
+        button.classList.remove('text-gray-500');
+        button.classList.add('text-blue-600');
+      }
+    }
+
+    async function deleteEmail(emailId) {
+      // Show confirmation dialog
+      if (!confirm('Are you sure you want to delete this email? This action cannot be undone.')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/email/${emailId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          // Show success message
+          showNotification('Email deleted successfully', 'success');
+          
+          // Remove the email row from the table
+          const emailRow = document.querySelector(`button[onclick="deleteEmail(${emailId})"]`).closest('tr');
+          if (emailRow) {
+            emailRow.style.transition = 'opacity 0.3s ease-out';
+            emailRow.style.opacity = '0';
+            setTimeout(() => {
+              emailRow.remove();
+            }, 300);
+          }
+
+          // Also remove from mobile view if it exists
+          const mobileCard = document.querySelector(`button[onclick="deleteEmail(${emailId})"]`).closest('.bg-white.rounded-xl');
+          if (mobileCard) {
+            mobileCard.style.transition = 'opacity 0.3s ease-out';
+            mobileCard.style.opacity = '0';
+            setTimeout(() => {
+              mobileCard.remove();
+            }, 300);
+          }
+        } else {
+          const error = await response.json();
+          showNotification(error.error || 'Failed to delete email', 'error');
+        }
+      } catch (error) {
+        console.error('Delete error:', error);
+        showNotification('Failed to delete email', 'error');
+      }
+    }
+
+    function showNotification(message, type = 'info') {
+      // Create notification element
+      const notification = document.createElement('div');
+      notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-medium transition-all duration-300 transform translate-x-full ${
+        type === 'success' ? 'bg-green-500' : 
+        type === 'error' ? 'bg-red-500' : 
+        'bg-blue-500'
+      }`;
+      notification.textContent = message;
+
+      // Add to page
+      document.body.appendChild(notification);
+
+      // Animate in
+      setTimeout(() => {
+        notification.classList.remove('translate-x-full');
+      }, 100);
+
+      // Remove after 3 seconds
+      setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 300);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

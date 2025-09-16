@@ -1,0 +1,64 @@
+const OpenAI = require("openai");
+const { PROFILE, OPENAI_CONFIG } = require("./config");
+
+
+const client = new OpenAI({ apiKey: OPENAI_CONFIG.apiKey });
+
+
+/**
+* Generate a subject + body for a pitch/application email.
+* @param {Object} opts
+* @param {String} opts.intent - "pitch" | "apply"
+* @param {String} opts.recipient - recipient email or org/person name (for tone)
+* @param {String} opts.role - role title (e.g., Frontend Developer)
+* @param {String} opts.jobDesc - pasted JD or summary
+* @param {String} opts.extra - any extra instructions
+*/
+async function generateEmail({ intent, recipient, role, jobDesc, extra }) {
+const system = `You are an assistant that writes concise, high-conversion job application emails. Use plain text. British/International English. Avoid flowery language. 130-220 words. Include 3-5 bullet points only when helpful. Include portfolio links if provided.`;
+
+
+const profileBlock = `Candidate: ${PROFILE.name} | ${PROFILE.title}\nLocation: ${PROFILE.location}\nLinks: ${PROFILE.links}`;
+
+
+const user = [
+`INTENT: ${intent}`,
+`RECIPIENT: ${recipient || "Unknown"}`,
+`ROLE: ${role || "Not specified"}`,
+`JOB DESCRIPTION:`,
+jobDesc || "(none provided)",
+extra ? `EXTRA: ${extra}` : "",
+`\nWrite a short, tailored email suitable for sending to the RECIPIENT. ` +
+`If intent is 'apply', treat as formal cover-letter style. ` +
+`If 'pitch', treat as cold pitch for services (web/app development).` +
+`Use the candidate block below. End with a polite CTA.`,
+`\n${profileBlock}`
+].join("\n");
+
+
+const resp = await client.chat.completions.create({
+model: OPENAI_CONFIG.model,
+messages: [
+{ role: "system", content: system },
+{ role: "user", content: user }
+],
+temperature: 0.6
+});
+
+
+const text = resp.choices?.[0]?.message?.content?.trim() || "";
+
+
+// Simple parse: first line as Subject if present like "Subject: ..."
+let subject = `Application: ${role || "Opportunity"}`;
+let body = text;
+const subjectMatch = text.match(/^\s*Subject\s*:\s*(.+)$/im);
+if (subjectMatch) {
+subject = subjectMatch[1].trim();
+body = text.replace(subjectMatch[0], "").trim();
+}
+return { subject, body };
+}
+
+
+module.exports = { generateEmail };

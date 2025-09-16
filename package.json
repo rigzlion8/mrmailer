@@ -1,0 +1,37 @@
+{
+  "name": "mrmailer",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "NODE_ENV=production node src/index.js",
+    "bot": "node src/bot.js",
+    "bot:dev": "nodemon src/bot.js",
+    "vercel-build": "echo 'Build completed'",
+    "vercel-dev": "npm run dev"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.4.0",
+    "discord.js": "^14.15.3",
+    "dotenv": "^16.4.5",
+    "express": "^5.1.0",
+    "mongodb": "^6.19.0",
+    "nodemailer": "^6.9.14",
+    "nodemon": "^3.1.10",
+    "openai": "^4.67.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rigzlion8/mrmailer.git"
+  },
+  "keywords": [
+    "mailer"
+  ],
+  "author": "rigzlion8",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rigzlion8/mrmailer/issues"
+  },
+  "homepage": "https://github.com/rigzlion8/mrmailer#readme",
+  "description": ""
+}
