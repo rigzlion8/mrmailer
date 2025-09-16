@@ -4,15 +4,35 @@ const fs = require("fs");
 
 
 function transporter() {
-return nodemailer.createTransport({
+// Try different configurations based on the host
+const config = {
 host: SMTP.host,
 port: Number(SMTP.port),
 secure: SMTP.secure === true || SMTP.secure === "true",
 auth: {
 user: SMTP.user,
 pass: SMTP.pass
+},
+connectionTimeout: 60000, // 60 seconds
+greetingTimeout: 30000,   // 30 seconds
+socketTimeout: 60000,     // 60 seconds
+};
+
+// Add TLS configuration for Gmail
+if (SMTP.host === 'smtp.gmail.com') {
+config.tls = {
+  rejectUnauthorized: false,
+  ciphers: 'SSLv3'
+};
+// Try port 465 with SSL for Gmail
+if (SMTP.port == 587) {
+  config.port = 465;
+  config.secure = true;
 }
-});
+}
+
+console.log(`[email] 🔧 SMTP Config: ${config.host}:${config.port} (secure: ${config.secure})`);
+return nodemailer.createTransport(config);
 }
 
 
