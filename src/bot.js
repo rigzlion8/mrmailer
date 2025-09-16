@@ -34,7 +34,7 @@ async function handlePayload(msg, payload) {
     const emailResult = await sendEmail({
       to: payload.to,
       subject: emailContent.subject,
-      text: emailContent.text,
+      text: emailContent.body,
       html: emailContent.html
     });
     console.log(`[email] ✅ Email sent successfully:`, emailResult.messageId);
@@ -44,7 +44,7 @@ async function handlePayload(msg, payload) {
     const dbResult = await dbAdapter.logEmail({
       to: payload.to,
       subject: emailContent.subject,
-      body: emailContent.text,
+      body: emailContent.body,
       intent: payload.intent,
       role: payload.role,
       jobDesc: payload.jobDesc,
