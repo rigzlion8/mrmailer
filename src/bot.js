@@ -55,13 +55,22 @@ async function handlePayload(msg, payload) {
     console.log(`[db] ✅ Email logged to database with ID:`, dbResult);
     
     // Send confirmation to Discord
-    const preview = formatPreview(emailContent, payload);
+    const preview = formatPreview({
+      subject: emailContent.subject,
+      body: emailContent.body,
+      to: payload.to
+    });
     await msg.reply(`✅ **Email sent successfully!**\n\n${preview}`);
     console.log(`[discord] ✅ Confirmation sent to Discord`);
     
   } catch (error) {
     console.error(`[bot] ❌ Error processing command:`, error);
-    await msg.reply(`❌ **Error:** ${error.message}`);
+    console.error(`[bot] ❌ Error stack:`, error.stack);
+    try {
+      await msg.reply(`❌ **Error:** ${error.message}`);
+    } catch (discordError) {
+      console.error(`[bot] ❌ Failed to send error message to Discord:`, discordError);
+    }
   }
 }
 
